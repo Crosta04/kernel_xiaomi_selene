@@ -18,7 +18,7 @@ jobs:
 
     - name: Clone AARCH64 Toolchain
       run: |
-        git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 toolchain
+        git clone https://bitbucket.org/matthewdalex/aarch64-linux-android-4.9.git
 
     - name: Make defconfig
       run: |
