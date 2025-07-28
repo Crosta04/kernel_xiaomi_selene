@@ -1,0 +1,40 @@
+name: Build Kernel for Redmi 10 (selene)
+
+on:
+  workflow_dispatch:  # Permette di avviare il build manualmente da GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Kernel Source
+      uses: actions/checkout@v4
+
+    - name: Set up environment variables
+      run: |
+        echo "TOOLCHAIN_PATH=${GITHUB_WORKSPACE}/toolchain" >> $GITHUB_ENV
+        echo "KERNEL_OUT=${GITHUB_WORKSPACE}/out" >> $GITHUB_ENV
+
+    - name: Clone AARCH64 Toolchain
+      run: |
+        git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 toolchain
+
+    - name: Make defconfig
+      run: |
+        mkdir -p $KERNEL_OUT
+        export ARCH=arm64
+        export CROSS_COMPILE=${TOOLCHAIN_PATH}/bin/aarch64-linux-android-
+        make O=$KERNEL_OUT defconfig
+
+    - name: Build Kernel
+      run: |
+        export ARCH=arm64
+        export CROSS_COMPILE=${TOOLCHAIN_PATH}/bin/aarch64-linux-android-
+        make -j$(nproc) O=$KERNEL_OUT Image.gz-dtb
+
+    - name: Upload Kernel Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kernel-Image
+        path: out/arch/arm64/boot/Image.gz-dtb
